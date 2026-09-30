@@ -1,5 +1,5 @@
 // Service worker: la aplicación funciona sin conexión una vez abierta por primera vez.
-const VERSION = 'v2';
+const VERSION = 'v3';
 const SHELL = `avd-pasos-${VERSION}`;
 const PICTOS = 'arasaac-pictos-v1'; // se conserva entre versiones de la aplicación
 

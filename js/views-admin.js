@@ -9,7 +9,7 @@ import {
 } from './ui.js';
 import { cacheStatus, cachePictos, ATTRIBUTION } from './pictos.js';
 import { usedPictos } from './store.js';
-import { refresh, tpage, hashPin } from './views-therapist.js';
+import { refresh, tpage, hashPin, installCard } from './views-therapist.js';
 
 // ───────── Preferencias (de una persona o generales) ─────────
 function prefsForm(p, onchange) {
@@ -293,12 +293,7 @@ export function viewSettings() {
         s.pin = await hashPin(a); await save('settings'); toast('PIN actualizado.');
       } }))),
 
-    h('section', { class: 'card' },
-      h('h2', null, 'Instalación'),
-      h('p', null, 'Instalada como aplicación funciona a pantalla completa y sin conexión. En Chrome o Edge usa «Instalar aplicación»; en iPad o iPhone, Safari → Compartir → «Añadir a pantalla de inicio».'),
-      window.deferredInstall && h('div', { class: 'toolbar start' }, btn('Instalar en este dispositivo', { icon: 'download', kind: 'primary', onclick: async () => {
-        window.deferredInstall.prompt(); window.deferredInstall = null; refresh();
-      } }))),
+    installCard(),
 
     h('section', { class: 'card' },
       h('h2', null, 'Acerca de'),

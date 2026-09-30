@@ -56,6 +56,7 @@ function render() {
 
 window.addEventListener('hashchange', render);
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); window.deferredInstall = e; });
+window.addEventListener('appinstalled', () => { window.deferredInstall = null; });
 
 load().then(() => {
   render();

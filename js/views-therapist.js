@@ -100,6 +100,42 @@ export function viewGate() {
   return { el: page({ title: 'Configuración', back: '#/', cls: 'therapist', attribution: false }, pad.el, forgot), cleanup: pad.cleanup };
 }
 
+// ───────── Instalación ─────────
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+async function install() {
+  const ev = window.deferredInstall;
+  if (ev) { // Chrome y Edge: instalación directa
+    ev.prompt();
+    const { outcome } = await ev.userChoice;
+    window.deferredInstall = null;
+    if (outcome === 'accepted') toast('Aplicación instalada.');
+    return;
+  }
+  // Safari y otros navegadores no permiten instalar desde un botón: se explican los pasos.
+  await choose({
+    title: 'Instalar la aplicación',
+    text: isIOS()
+      ? 'En iPhone y iPad se instala desde Safari: pulsa el botón Compartir (el cuadrado con la flecha hacia arriba) y elige «Añadir a pantalla de inicio».'
+      : 'Este navegador no permite instalarla con un botón. Abre el menú del navegador (⋮) y elige «Instalar aplicación» o «Añadir a pantalla de inicio». Si no aparece, prueba con Chrome o Edge.',
+    options: [{ label: 'Entendido', value: true, kind: 'primary' }],
+  });
+}
+
+/** Tarjeta con el botón de instalación (o el aviso de que ya está instalada). */
+export function installCard() {
+  if (isStandalone()) {
+    return h('section', { class: 'card' },
+      h('h2', null, 'Aplicación instalada'),
+      h('p', { class: 'muted' }, 'Estás usando la aplicación instalada en este dispositivo. Funciona a pantalla completa y sin conexión.'));
+  }
+  return h('section', { class: 'card' },
+    h('h2', null, 'Instalar en este dispositivo'),
+    h('p', null, 'Instalada se abre con su propio icono, a pantalla completa y sin conexión.'),
+    h('div', { class: 'toolbar start' }, btn('Instalar aplicación', { icon: 'download', kind: 'primary', onclick: install })));
+}
+
 // ───────── Panel ─────────
 const navCard = (ic, title, text, hash) => h('button', { type: 'button', class: 'nav-card', onclick: () => go(hash) },
   icon(ic), h('b', null, title), h('span', null, text));
@@ -116,6 +152,7 @@ export function viewPanel() {
       h('p', null, 'Con este modo activo, cada tarjeta de categoría, actividad y rutina muestra un lápiz. Púlsalo para cambiar su nombre, su pictograma y sus pasos. También puedes usar las listas de abajo.'),
       h('div', { class: 'toolbar start' },
         btn('Editar sobre las pantallas', { icon: 'edit', kind: 'primary', onclick: () => go('#/categorias') }))),
+    installCard(),
     h('div', { class: 'panel-person' },
       field('Persona activa en este dispositivo',
         select(personOptions(), s.currentPersonId || '', async v => { s.currentPersonId = v || null; await save('settings'); applyPrefs(); toast(`Persona activa: ${personName(s.currentPersonId)}`); }),
